@@ -1,14 +1,14 @@
-export type Role = 'Cliente' | 'Administrador' | 'Empleado'
+export type Role = 'customer' | 'admin' | 'staff'
 
-export const roles: Role[] = ['Administrador', 'Cliente', 'Empleado']
+export const roles: Role[] = ['admin', 'customer', 'staff']
 
 export type NavItem = { label: string; href: string }
 
 /** Pantalla de inicio de cada rol después de iniciar sesión. */
 export const roleHome: Record<Role, string> = {
-  Administrador: '/admin',
-  Cliente: '/dashboard',
-  Empleado: '/pos',
+  admin: '/admin',
+  customer: '/dashboard',
+  staff: '/pos',
 }
 
 /** Navegación del sitio para quien aún no ha iniciado sesión. */
@@ -18,18 +18,18 @@ export const publicNavigation: NavItem[] = [
 ]
 
 export const roleNavigation: Record<Role, NavItem[]> = {
-  Cliente: [
+  customer: [
     { label: 'Inicio', href: '/' },
     { label: 'Servicios', href: '/services' },
     { label: 'Mi cuenta', href: '/dashboard' },
     { label: 'Tiquetes', href: '/tickets' },
   ],
-  Empleado: [
+  staff: [
     { label: 'Punto de venta', href: '/pos' },
     { label: 'Escáner', href: '/scanner' },
     { label: 'Tiquetes', href: '/tickets' },
   ],
-  Administrador: [
+  admin: [
     { label: 'Resumen', href: '/admin' },
     { label: 'Catálogo', href: '/admin/catalog' },
     { label: 'Empleados', href: '/admin/employees' },
@@ -41,13 +41,13 @@ export const roleNavigation: Record<Role, NavItem[]> = {
 
 /** Qué roles pueden entrar a cada zona del sitio (por prefijo de ruta). */
 export const routeAccess: { prefix: string; roles: Role[] }[] = [
-  { prefix: '/admin', roles: ['Administrador'] },
-  { prefix: '/pos', roles: ['Empleado', 'Administrador'] },
-  { prefix: '/scanner', roles: ['Empleado', 'Administrador'] },
-  { prefix: '/tickets', roles: ['Cliente', 'Empleado', 'Administrador'] },
-  { prefix: '/dashboard', roles: ['Cliente'] },
-  { prefix: '/checkout', roles: ['Cliente'] },
-  { prefix: '/confirmation', roles: ['Cliente'] },
+  { prefix: '/admin', roles: ['admin'] },
+  { prefix: '/pos', roles: ['staff', 'admin'] },
+  { prefix: '/scanner', roles: ['staff', 'admin'] },
+  { prefix: '/tickets', roles: ['customer', 'staff', 'admin'] },
+  { prefix: '/dashboard', roles: ['customer'] },
+  { prefix: '/checkout', roles: ['customer'] },
+  { prefix: '/confirmation', roles: ['customer'] },
 ]
 
 export function rolesAllowedFor(pathname: string): Role[] | null {

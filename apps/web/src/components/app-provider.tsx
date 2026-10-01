@@ -50,8 +50,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback((email: string, name?: string) => {
     const normalized = email.trim().toLowerCase()
-    const known = name ? undefined : sampleAccounts.find((account) => account.email === normalized)
-    const next: Session = known ?? { name: name?.trim() || nameFromEmail(normalized), email: normalized, role: 'Cliente' }
+
+    // Buscar siempre en sampleAccounts sin importar si 'name' viene definido
+    const known = sampleAccounts.find((account) => account.email.toLowerCase() === normalized)
+
+    // Si no existe, crear la cuenta con rol 'customer' (en minúsculas)
+    const next: Session = known ?? {
+      name: name?.trim() || nameFromEmail(normalized),
+      email: normalized,
+      role: 'customer',
+    }
+
     setSession(next)
     return next
   }, [setSession])

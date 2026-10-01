@@ -17,11 +17,11 @@ export function TopBar() {
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`))
   const close = () => setOpenMenu(false)
 
-  return <header className={`topbar ${session?.role === 'Empleado' ? 'employee-topbar' : ''}`}>
+  return <header className={`topbar ${session?.role === 'staff' ? 'employee-topbar' : ''}`}>
     <div className="topbar-inner">
-      <Link href={session ? roleHome[session.role] : '/'} aria-label="Ir al inicio" onClick={close}><Brand /></Link>
+      <Link href={session && roleHome[session.role] ? roleHome[session.role] : '/'} aria-label="Ir al inicio" onClick={close}><Brand /></Link>
       <nav className="hidden items-center gap-7 md:flex" aria-label="Navegación principal">
-        {items.map(({ label, href }) => <Link key={href} href={href} className={`nav-link ${isActive(href) ? 'nav-active' : ''}`}>{label}</Link>)}
+        {items && items.map(({ label, href }) => <Link key={href} href={href} className={`nav-link ${isActive(href) ? 'nav-active' : ''}`}>{label}</Link>)}
       </nav>
       <div className="flex items-center gap-2">
         <button type="button" className="theme-toggle" aria-label={dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'} onClick={() => setDark(!dark)}>{dark ? <Sun size={17} /> : <Moon size={17} />}</button>
