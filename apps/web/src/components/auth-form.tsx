@@ -23,6 +23,10 @@ function getRoleDestination(role: Role): string {
   }
 }
 
+function getSafeNextPath(path: string | null) {
+  return path && path.startsWith('/') && !path.startsWith('//') ? path : null
+}
+
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const register = mode === 'register'
   const router = useRouter()
@@ -33,7 +37,8 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   // Si ya hay sesión iniciada, redirigir a su panel correspondiente
   useEffect(() => {
     if (ready && session) {
-      router.replace(getRoleDestination(session.role))
+      const nextPath = getSafeNextPath(new URLSearchParams(window.location.search).get('next'))
+      router.replace(session.role === 'customer' && nextPath ? nextPath : getRoleDestination(session.role))
     }
   }, [ready, session, router])
 
@@ -53,10 +58,8 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     )
 
     // Redirigir según el rol del usuario conectado
-    const nextParam = new URLSearchParams(window.location.search).get('next')
-    const destination = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
-      ? nextParam
-      : getRoleDestination(account.role)
+    const nextPath = getSafeNextPath(new URLSearchParams(window.location.search).get('next'))
+    const destination = account.role === 'customer' && nextPath ? nextPath : getRoleDestination(account.role)
 
     router.push(destination)
   }
@@ -169,7 +172,13 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 
           <div className="auth-switch">
             {register ? '¿Ya tienes cuenta?' : '¿Aún no tienes cuenta?'}{' '}
-            <Link href={register ? '/login' : '/register'}>
+            <Link href={register ? '/login' : '/register'} onClick={(event) => {
+              const nextPath = getSafeNextPath(new URLSearchParams(window.location.search).get('next'))
+              if (!nextPath) return
+              event.preventDefault()
+              const destination = register ? '/login' : '/register'
+              router.push(`${destination}?next=${encodeURIComponent(nextPath)}`)
+            }}>
               {register ? 'Ingresar' : 'Regístrate'}
             </Link>
           </div>

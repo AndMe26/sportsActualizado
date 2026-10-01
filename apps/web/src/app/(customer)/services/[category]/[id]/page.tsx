@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, Clock3, MapPin, ShieldCheck, Users } from 'lucide-react'
-import { calculateBookingPrice, categoryBySlug, formatDate, formatMoney, timeSlots } from '@sportcomplex/core'
+import { calculateBookingPrice, categoryBySlug, formatDate, formatMoney, roleHome, timeSlots } from '@sportcomplex/core'
 import { categoryIcons } from '@/components/category-icons'
 import { IconBox } from '@/components/icon-box'
 import { useApp } from '@/components/app-provider'
@@ -26,7 +26,7 @@ function getWeekDates(today: string) {
 export default function ServiceBookingPage() {
   const { category: slug, id } = useParams<{ category: string; id: string }>()
   const router = useRouter()
-  const { notify } = useApp()
+  const { notify, ready, session } = useApp()
   const [catalog] = useCatalog()
   const [bookings] = useBookings()
   const [, setDraft] = useDraft()
@@ -36,6 +36,16 @@ export default function ServiceBookingPage() {
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [attendees, setAttendees] = useState(1)
+  const reservationPath = `/services/${slug}/${id}`
+
+  useEffect(() => {
+    if (!ready) return
+    if (!session) {
+      router.replace(`/login?next=${encodeURIComponent(reservationPath)}`)
+    } else if (session.role !== 'customer') {
+      router.replace(roleHome[session.role])
+    }
+  }, [ready, reservationPath, router, session])
 
   useEffect(() => {
     if (today) {
@@ -46,6 +56,7 @@ export default function ServiceBookingPage() {
   }, [id, today])
 
   if (!category || !item) notFound()
+  if (!ready || session?.role !== 'customer') return <main className="section-shell booking-page" aria-busy="true" />
 
   const available = item.status === 'Disponible'
   const isCourt = item.category === 'canchas'
