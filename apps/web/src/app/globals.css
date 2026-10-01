@@ -408,6 +408,18 @@ button { cursor: pointer; }
 .catalog-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
 .catalog-grid .category-card { display: block; }
 .catalog-grid .category-card p { min-height: 32px; }
+.catalog-grid .category-card { overflow: hidden; padding: 0; }
+.catalog-card-image { position: relative; width: 100%; aspect-ratio: 1.9; overflow: hidden; background: var(--surface-soft); }
+.catalog-card-image img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .25s; }
+.catalog-grid .category-card:hover .catalog-card-image img { transform: scale(1.035); }
+.catalog-image-status { position: absolute; top: 10px; right: 10px; background: rgba(15,26,21,.72); color: #fff; }
+.catalog-image-status.catalog-status-off { background: rgba(15,26,21,.72); color: #fff; }
+.catalog-card-content { padding: 16px 18px 15px; }
+.catalog-grid .catalog-card-content h3 { margin: 0 0 4px; }
+.booking-photo { background: var(--surface-soft); }
+.booking-cover-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.booking-photo::after { position: absolute; z-index: 1; inset: 0; background: linear-gradient(0deg, rgba(19,49,36,.48), transparent 65%); content: ''; }
+.booking-photo-overlay { z-index: 2; }
 .catalog-meta { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0 14px; color: var(--subtle); font-size: 10px; }
 .catalog-meta span { display: inline-flex; align-items: center; gap: 5px; }
 .catalog-status { padding: 4px 8px; border-radius: 99px; background: var(--state-success-surface); color: var(--state-success); font-size: 8px; font-weight: 800; }

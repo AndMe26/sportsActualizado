@@ -24,10 +24,12 @@ export default function CategoryCatalogPage() {
       : <div className="catalog-grid">{items.map((item) => {
         const available = item.status === 'Disponible'
         const card = <>
-          <div className="category-top"><IconBox icon={Icon} tone={category.tone} /><span className={`catalog-status ${available ? '' : 'catalog-status-off'}`}>{available ? 'Disponible' : 'No disponible'}</span></div>
-          <h3>{item.name}</h3><p>{item.description}</p>
-          <div className="catalog-meta"><span><MapPin size={13} /> {item.sede}</span><span><Users size={13} /> Hasta {item.capacity}</span></div>
-          <div className="category-bottom"><span>{formatMoney(item.price)} / {category.unit}</span>{available && <span className="round-arrow"><ArrowRight size={15} /></span>}</div>
+          <div className="catalog-card-image"><img src={item.image || '/images/club-hero.png'} alt={item.name} loading="lazy" onError={(event) => { event.currentTarget.src = '/images/club-hero.png' }} /><span className={`catalog-status catalog-image-status ${available ? '' : 'catalog-status-off'}`}>{available ? 'Disponible' : 'No disponible'}</span></div>
+          <div className="catalog-card-content">
+            <h3>{item.name}</h3><p>{item.description}</p>
+            <div className="catalog-meta"><span><MapPin size={13} /> {item.sede}</span><span><Users size={13} /> Hasta {item.capacity}</span></div>
+            <div className="category-bottom"><span>{formatMoney(item.price)} / {category.unit}</span>{available && <span className="round-arrow"><ArrowRight size={15} /></span>}</div>
+          </div>
         </>
         return available
           ? <Link key={item.id} href={`/services/${category.slug}/${item.id}`} className="category-card">{card}</Link>

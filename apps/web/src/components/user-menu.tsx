@@ -50,7 +50,7 @@ export function UserMenu({ variant = 'topbar' }: { variant?: 'topbar' | 'dark' |
     </button>
     {open && <div role="menu" className="user-dropdown">
       <div className="user-dropdown-head"><b>{session.name}</b><small>{session.email}</small></div>
-      {session.role === 'Cliente' && <Link role="menuitem" href="/dashboard" onClick={() => setOpen(false)}>Mi cuenta</Link>}
+      {session.role === 'customer' && <Link role="menuitem" href="/dashboard" onClick={() => setOpen(false)}>Mi cuenta</Link>}
       <button role="menuitem" type="button" className="user-logout" onClick={() => { setOpen(false); logout() }}><LogOut size={15} /> Cerrar sesión</button>
     </div>}
   </div>

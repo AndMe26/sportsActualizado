@@ -1,81 +1,130 @@
 'use client'
 
-import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, Clock3, MapPin, ShieldCheck, Users } from 'lucide-react'
-import { categoryBySlug, formatDate, formatMoney, timeSlots as slots, toIso } from '@sportcomplex/core'
+import { calculateBookingPrice, categoryBySlug, formatDate, formatMoney, timeSlots } from '@sportcomplex/core'
 import { categoryIcons } from '@/components/category-icons'
 import { IconBox } from '@/components/icon-box'
-import { ReservationModal } from '@/components/reservation-modal'
 import { useApp } from '@/components/app-provider'
-import { useBookings, useCatalog, useDraft, useSettings } from '@/lib/stores'
+import { useBookings, useCatalog, useDraft } from '@/lib/stores'
 import { useToday } from '@/lib/persistent-state'
 
-export default function BookingPage() {
+function getWeekDates(today: string) {
+  if (!today) return []
+  const [year, month, day] = today.split('-').map(Number)
+  const firstDate = new Date(year, month - 1, day, 12)
+  return Array.from({ length: 7 }, (_, offset) => {
+    const date = new Date(firstDate)
+    date.setDate(firstDate.getDate() + offset)
+    const pad = (value: number) => String(value).padStart(2, '0')
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+  })
+}
+
+export default function ServiceBookingPage() {
   const { category: slug, id } = useParams<{ category: string; id: string }>()
   const router = useRouter()
-  const { session, ready, notify } = useApp()
+  const { notify } = useApp()
   const [catalog] = useCatalog()
   const [bookings] = useBookings()
   const [, setDraft] = useDraft()
-  const [settings] = useSettings()
-  const today = useToday()
   const category = categoryBySlug(slug)
   const item = catalog.find((entry) => entry.id === id && entry.category === slug)
-  const [dayIndex, setDayIndex] = useState(0)
-  const [selectedSlot, setSelectedSlot] = useState('6:30 p. m.')
+  const today = useToday()
+  const [selectedDate, setSelectedDate] = useState('')
+  const [selectedTime, setSelectedTime] = useState('')
   const [attendees, setAttendees] = useState(1)
-  const [modalOpen, setModalOpen] = useState(false)
 
-  const days = useMemo(() => {
-    if (!today) return []
-    const [year, month, day] = today.split('-').map(Number)
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(year, month - 1, day + index, 12)
-      return { iso: toIso(date), label: date.toLocaleDateString('es-CO', { weekday: 'short' }).replace('.', ''), day: date.getDate() }
-    })
-  }, [today])
+  useEffect(() => {
+    if (today) {
+      setSelectedDate(today)
+      setSelectedTime('')
+      setAttendees(1)
+    }
+  }, [id, today])
 
-  if (ready && (!category || !item)) notFound()
-  if (!category || !item) return <main className="section-shell booking-page" />
+  if (!category || !item) notFound()
 
-  const selected = days[dayIndex]
-  const taken = new Set(bookings.filter((booking) => booking.service === item.name && booking.date === selected?.iso && booking.status !== 'Cancelada').map((booking) => booking.time))
+  const available = item.status === 'Disponible'
+  const isCourt = item.category === 'canchas'
+  const weekDates = getWeekDates(today)
+  const total = calculateBookingPrice(item, attendees)
+  const maxAttendees = Math.max(1, item.capacity)
   const Icon = categoryIcons[category.icon]
-  const maxAttendees = Math.max(1, Math.min(item.capacity, 6))
 
-  const reserve = () => {
-    if (!selected) return
-    if (!settings.bookingsOpen) { notify('Las reservas en línea están pausadas por ahora.', 'error'); return }
-    if (item.status !== 'Disponible') { notify('Este espacio no está disponible por ahora.', 'error'); return }
-    if (!session) { notify('Inicia sesión para continuar con tu reserva.'); router.push(`/login?next=${encodeURIComponent(`/services/${category.slug}/${item.id}`)}`); return }
-    setDraft({ itemId: item.id, date: selected.iso, time: selectedSlot, attendees })
-    setModalOpen(true)
+  const continueToCheckout = () => {
+    if (!available || !selectedDate || !selectedTime) return
+    setDraft({ itemId: item.id, date: selectedDate, time: selectedTime, attendees })
+    router.push('/checkout')
   }
 
-  return <main className="section-shell booking-page">
-    <Link href={`/services/${category.slug}`} className="back-link"><ArrowLeft size={15} /> Volver a {category.name.toLowerCase()}</Link>
-    <div className="booking-layout"><div className="booking-main">
-      <div className="booking-heading"><IconBox icon={Icon} tone={category.tone} className="booking-icon" /><div><div className="eyebrow">RESERVA TU ESPACIO</div><h1>{item.name}</h1><p>{item.description} · Sede {item.sede}</p></div></div>
-      <div className="booking-photo"><div className="booking-photo-overlay"><span><span className="live-dot" /> {item.status.toUpperCase()}</span><span><MapPin size={13} /> Sede {item.sede}</span></div></div>
-      <div className="calendar-section"><div className="calendar-heading"><div><h2>Elige tu día</h2><p>Selecciona una fecha para ver los horarios disponibles.</p></div>{selected && <span className="calendar-month">{formatDate(selected.iso, { month: 'long', year: 'numeric' })}</span>}</div>
-        <div className="week-grid">{days.map((day, i) => <button key={day.iso} onClick={() => setDayIndex(i)} className={`day-choice ${dayIndex === i ? 'day-selected' : ''}`}><span>{day.label}</span><b>{day.day}</b></button>)}</div>
+  return (
+    <main className="section-shell booking-page">
+      <Link href={`/services/${category.slug}`} className="back-link">
+        <ArrowLeft size={15} /> Volver a {category.name.toLowerCase()}
+      </Link>
+      <div className="booking-layout">
+        <section>
+          <div className="booking-heading">
+            <IconBox icon={Icon} tone={category.tone} className="booking-icon" />
+            <div>
+              <div className="eyebrow">RESERVA TU ESPACIO</div>
+              <h1>{item.name}</h1>
+              <p>{item.description} · Sede {item.sede}</p>
+            </div>
+          </div>
+
+          <div className="booking-photo">
+            <img className="booking-cover-image" src={item.image || '/images/club-hero.png'} alt="" onError={(event) => { event.currentTarget.src = '/images/club-hero.png' }} />
+            <div className="booking-photo-overlay">
+              <span><i className="live-dot" style={{ background: available ? undefined : '#edb45b' }} />{available ? 'DISPONIBLE' : 'NO DISPONIBLE'}</span>
+              <span><MapPin size={12} /> Sede {item.sede}</span>
+            </div>
+          </div>
+
+          <section className="calendar-section">
+            <div className="calendar-heading">
+              <div><h2>Elige tu día</h2><p>Selecciona una fecha para ver los horarios disponibles.</p></div>
+              <span className="calendar-month"><CalendarDays size={13} />{weekDates[0] ? formatDate(weekDates[0], { month: 'long', year: 'numeric' }) : ''}</span>
+            </div>
+            <div className="week-grid">
+              {weekDates.map((date) => (
+                <button key={date} type="button" className={`day-choice ${date === selectedDate ? 'day-selected' : ''}`} aria-pressed={date === selectedDate} onClick={() => { setSelectedDate(date); setSelectedTime('') }}>
+                  <span>{formatDate(date, { weekday: 'short' })}</span><b>{Number(date.slice(-2))}</b><i />
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="slots-section">
+            <div className="slots-title">
+              <div><h2>Horarios disponibles</h2><p>{selectedDate ? formatDate(selectedDate) : 'Selecciona un día'}</p></div>
+              <div className="slot-legend"><span><i className="legend-open" />Disponible</span><span><i className="legend-blocked" />Ocupado</span></div>
+            </div>
+            <div className="slot-grid">
+              {timeSlots.map((time) => {
+                const booked = bookings.some((booking) => booking.service === item.name && booking.date === selectedDate && booking.time === time && booking.status !== 'Cancelada')
+                const disabled = !available || !selectedDate || booked
+                return <button key={time} type="button" className={`slot-button ${selectedTime === time ? 'slot-selected' : ''} ${disabled ? 'slot-disabled' : ''}`} disabled={disabled} aria-pressed={selectedTime === time} onClick={() => setSelectedTime(time)}>{time}</button>
+              })}
+            </div>
+          </section>
+        </section>
+
+        <aside className="booking-summary">
+          <div className="summary-top"><div className="eyebrow">RESUMEN DE RESERVA</div><div className="summary-secure"><ShieldCheck size={11} /> Reserva segura</div></div>
+          <h3>Tu próximo<br />momento te espera.</h3>
+          <div className="summary-detail"><CalendarDays size={15} /><div><small>Fecha</small><b>{selectedDate ? formatDate(selectedDate) : 'Elige un día'}</b></div></div>
+          <div className="summary-detail"><Clock3 size={15} /><div><small>Hora y duración</small><b>{selectedTime ? `${selectedTime} · 60 minutos` : 'Elige un horario'}</b></div></div>
+          <div className="summary-detail"><MapPin size={15} /><div><small>Sede</small><b>{item.sede}</b></div></div>
+          {!isCourt && <label className="attendee-select"><span><Users size={14} /> Asistentes</span><select aria-label="Cantidad de asistentes" value={attendees} onChange={(event) => setAttendees(Number(event.target.value))}>{Array.from({ length: maxAttendees }, (_, index) => index + 1).map((count) => <option key={count} value={count}>{count}</option>)}</select></label>}
+          <div className="summary-total"><span>Total a pagar</span><b>{formatMoney(total)} <small>COP</small></b></div>
+          <button className="action-button w-full justify-center" onClick={continueToCheckout} disabled={!available || !selectedDate || !selectedTime}>{selectedTime ? 'Reservar este horario' : 'Elige un horario'} <ArrowRight size={15} /></button>
+          <p className="summary-note"><ShieldCheck size={11} /> El horario se confirma al terminar la reserva.</p>
+        </aside>
       </div>
-      <div className="slots-section"><div className="slots-title"><div><h2>Horarios disponibles</h2><p>{selected ? formatDate(selected.iso) : ''}</p></div><div className="slot-legend"><span><i className="legend-open" />Disponible</span><span><i className="legend-blocked" />Ocupado</span></div></div>
-        <div className="slot-grid">{slots.map((slot) => <button disabled={taken.has(slot)} key={slot} onClick={() => setSelectedSlot(slot)} className={`slot-button ${taken.has(slot) ? 'slot-disabled' : ''} ${slot === selectedSlot ? 'slot-selected' : ''}`}>{slot}</button>)}</div>
-      </div>
-    </div>
-    <aside className="booking-summary"><div className="summary-top"><span className="eyebrow">RESUMEN DE RESERVA</span><span className="summary-secure"><ShieldCheck size={14} /> Reserva segura</span></div>
-      <h3>Tu próximo<br />momento te espera.</h3>
-      <div className="summary-detail"><CalendarDays size={17} /><div><small>Fecha</small><b>{selected ? formatDate(selected.iso) : '—'}</b></div></div>
-      <div className="summary-detail"><Clock3 size={17} /><div><small>Hora y duración</small><b>{selectedSlot} · 60 minutos</b></div></div>
-      <div className="summary-detail"><MapPin size={17} /><div><small>Sede</small><b>{item.sede} · Medellín</b></div></div>
-      <label className="summary-detail attendee-select"><Users size={17} /><span>Asistentes</span><select aria-label="Cantidad de asistentes" value={attendees} onChange={(event) => setAttendees(Number(event.target.value))}>{Array.from({ length: maxAttendees }, (_, i) => i + 1).map((count) => <option key={count} value={count}>{count}</option>)}</select></label>
-      <div className="summary-total"><span>Total a pagar</span><b>{formatMoney(item.price * attendees)} <small>COP</small></b></div>
-      <button className="action-button w-full justify-center" onClick={reserve} disabled={!selected}>Reservar este horario <ArrowRight size={16} /></button>
-      {!session && ready && <p className="summary-note"><ShieldCheck size={13} /> Necesitas iniciar sesión para confirmar.</p>}
-    </aside></div>
-    {modalOpen && selected && <ReservationModal item={item} date={selected.iso} time={selectedSlot} attendees={attendees} close={() => setModalOpen(false)} proceed={() => { setModalOpen(false); router.push('/checkout') }} />}
-  </main>
+    </main>
+  )
 }
