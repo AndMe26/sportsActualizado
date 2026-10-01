@@ -1,0 +1,53 @@
+'use client'
+
+import Link from 'next/link'
+import { ArrowRight, MapPin, Sparkles, Star } from 'lucide-react'
+import { formatMoney, minPrice, serviceCategories } from '@sportcomplex/core'
+import { categoryIcons } from '@/components/category-icons'
+import { Brand } from '@/components/brand'
+import { IconBox } from '@/components/icon-box'
+import { useCatalog } from '@/lib/stores'
+
+export default function HomePage() {
+  const [catalog] = useCatalog()
+  return <>
+    <section className="hero-wrap">
+      <div className="hero-image" />
+      <div className="hero-content">
+        <div className="eyebrow hero-eyebrow"><span className="live-dot" /> UN LUGAR PARA LLEGAR MÁS LEJOS</div>
+        <h1>Tu mejor versión<br />empieza <span>aquí.</span></h1>
+        <p>Entrena, juega y recarga energía. Todo lo que te mueve, en un solo lugar.</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/services" className="action-button">Reserva tu espacio <ArrowRight size={17} /></Link>
+          <Link href="/services" className="hero-secondary">Explorar servicios</Link>
+        </div>
+        <div className="hero-proof"><div className="avatar-stack"><span>J</span><span>L</span><span>A</span><span>+</span></div><div><b>+2.400 personas</b><small>ya entrenan en Altura</small></div><span className="proof-divider" /><div className="rating"><span className="rating-stars" aria-label="Calificación 4.9 de 5">{Array.from({ length: 5 }, (_, index) => <Star key={index} size={11} fill="currentColor" />)}</span><small>4.9 / 5</small></div></div>
+      </div>
+      <div className="hero-location"><MapPin size={14} /> Medellín, Colombia <span className="hero-location-dot" /> Abierto hoy hasta las 10:00 p. m.</div>
+      <div className="hero-scroll">DESLIZA PARA EXPLORAR <span /></div>
+    </section>
+
+    <section className="section-shell service-section">
+      <div className="section-heading"><div><div className="eyebrow">TODO EN UN SOLO LUGAR</div><h2>Encuentra tu <span>espacio.</span></h2></div><Link href="/services" className="text-link">Ver todos los servicios <ArrowRight size={16} /></Link></div>
+      <div className="category-grid">
+        {serviceCategories.map(({ slug, name, description, icon, tone }, index) => {
+          const from = minPrice(catalog, slug)
+          return <Link className="category-card" key={slug} href={`/services/${slug}`}>
+            <div className="category-top"><IconBox icon={categoryIcons[icon]} tone={tone} /><span className="category-index">0{index + 1}</span></div>
+            <h3>{name}</h3><p>{description}</p>
+            <div className="category-bottom"><span>{from ? `Desde ${formatMoney(from)}` : 'Próximamente'}</span><span className="round-arrow"><ArrowRight size={15} className="-rotate-45" /></span></div>
+          </Link>
+        })}
+      </div>
+      <div className="how-section"><div className="how-intro"><div className="eyebrow">ASÍ DE FÁCIL</div><h2>Listo en <span>tres pasos.</span></h2><p>Más tiempo haciendo lo que te gusta. Menos tiempo organizándolo.</p></div>
+        <div className="steps-grid">{[
+          { n: '01', title: 'Elige', text: 'Encuentra el espacio ideal para ti.' },
+          { n: '02', title: 'Reserva', text: 'Escoge el día y la hora que prefieras.' },
+          { n: '03', title: 'Paga', text: 'Paga fácil y llega listo para jugar.' },
+        ].map((step, i) => <div className="step-card" key={step.n}><span className="step-number">{step.n}</span><div className="step-connector">{i < 2 && <span />}</div><h3>{step.title}</h3><p>{step.text}</p></div>)}</div>
+      </div>
+    </section>
+    <section className="cta-strip"><div className="cta-spark"><Sparkles size={20} /></div><div><h3>El siguiente partido empieza contigo.</h3><p>Reserva hoy. Tu espacio te está esperando.</p></div><Link href="/services" className="action-button">Reservar ahora <ArrowRight size={16} /></Link></section>
+    <footer className="footer"><Brand /><span>Movimiento que te hace bien.</span><span>© 2026 Altura Club · Medellín, Colombia</span></footer>
+  </>
+}

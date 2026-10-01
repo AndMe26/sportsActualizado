@@ -1,0 +1,18 @@
+{
+  "name": "sport-complex-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev -w @sportcomplex/web",
+    "build": "npm run build -w @sportcomplex/web",
+    "start": "npm run start -w @sportcomplex/web",
+    "typecheck": "npm run typecheck -w @sportcomplex/web"
+  },
+  "devDependencies": {
+    "shadcn": "^4.21.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

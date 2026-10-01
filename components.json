@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-nova",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "apps/web/src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@sportcomplex/ui/lib/utils",
+    "ui": "@sportcomplex/ui/components",
+    "lib": "@sportcomplex/ui/lib",
+    "hooks": "@/hooks"
+  },
+  "iconLibrary": "lucide"
+}
