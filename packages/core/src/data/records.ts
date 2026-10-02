@@ -29,9 +29,9 @@ export const initialBookings: Booking[] = [
 export type Employee = { id: string; name: string; email: string; role: Role }
 
 export const initialEmployees: Employee[] = [
-  { id: 'e1', name: 'Catalina Ríos', email: 'catalina@altura.co', role: 'Administrador' },
-  { id: 'e2', name: 'Andrés Muñoz', email: 'andres@altura.co', role: 'Empleado' },
-  { id: 'e3', name: 'Laura Pérez', email: 'laura@altura.co', role: 'Cliente' },
+  { id: 'e1', name: 'Catalina Ríos', email: 'catalina@altura.co', role: 'admin' },
+  { id: 'e2', name: 'Andrés Muñoz', email: 'andres@altura.co', role: 'staff' },
+  { id: 'e3', name: 'Laura Pérez', email: 'laura@altura.co', role: 'customer' },
 ]
 
 export type MembershipPeriod = 'Mensual' | 'Trimestral' | 'Anual'
@@ -47,7 +47,7 @@ export type Session = { name: string; email: string; role: Role }
 
 /** Cuentas de ejemplo mientras no exista autenticación real (Auth.js / OAuth). */
 export const sampleAccounts: Session[] = [
-  { name: 'Catalina Ríos', email: 'admin@altura.co', role: 'Administrador' },
-  { name: 'Andrés Muñoz', email: 'empleado@altura.co', role: 'Empleado' },
-  { name: 'María Camila Restrepo', email: 'cliente@altura.co', role: 'Cliente' },
+  { name: 'Catalina Ríos', email: 'admin@sportcomplex.com', role: 'admin' },
+  { name: 'Andrés Muñoz', email: 'empleado@sportcomplex.com', role: 'staff' },
+  { name: 'María Camila Restrepo', email: 'client@sportcomplex.com', role: 'customer' },
 ]

@@ -5,8 +5,8 @@ import AppChrome from '@/components/app-chrome'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Altura Club | Muévete a tu manera',
-  description: 'Reserva canchas, piscina, gimnasio y zona húmeda en Altura Club. Todo lo que te mueve, en un solo lugar.',
+  title: 'Sport Complex · Reserva tu espacio',
+  description: 'Reserva canchas, piscina, gimnasio y zona húmeda en Sport Complex todo en un solo lugar.',
   generator: 'v0.app',
   icons: {
     icon: [

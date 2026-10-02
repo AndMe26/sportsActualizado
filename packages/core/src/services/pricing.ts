@@ -1,3 +1,5 @@
+import type { CatalogItem } from '../data/catalog'
+
 export function formatMoney(amount: number): string {
   return `$${amount.toLocaleString('es-CO')}`
 }
@@ -15,4 +17,16 @@ export function formatDate(iso: string, options: Intl.DateTimeFormatOptions = { 
 export function toIso(date: Date): string {
   const pad = (value: number) => String(value).padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+/**
+ * Calcula el valor total de una reserva.
+ * Si el servicio es una cancha, el cobro es fijo por el espacio completo.
+ * Para los demás servicios, se multiplica por la cantidad de asistentes.
+ */
+export function calculateBookingPrice(item: CatalogItem, attendees: number): number {
+  if (item.category === 'canchas') {
+    return item.price
+  }
+  return item.price * Math.max(1, attendees)
 }

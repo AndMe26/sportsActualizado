@@ -7,6 +7,7 @@ import { categoryBySlug, formatDate, formatMoney, type Booking } from '@sportcom
 import { categoryIcons } from '@/components/category-icons'
 import { useApp } from '@/components/app-provider'
 import { useBookings, useCatalog, useDraft, useLastCode } from '@/lib/stores'
+import { calculateBookingPrice } from '@sportcomplex/core'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -22,7 +23,8 @@ export default function CheckoutPage() {
     return <main className="section-shell payment-page"><div className="dashboard-empty"><div><b>No tienes una reserva en curso</b><p>Elige un espacio y un horario para continuar.</p></div><Link href="/services">Ver servicios <ArrowRight size={15} /></Link></div></main>
   }
 
-  const total = item.price * draft.attendees
+  const isCourt = item.category === 'canchas'
+  const total = calculateBookingPrice(item, draft.attendees)
   const Icon = categoryIcons[category.icon]
 
   const confirm = () => {
@@ -54,5 +56,5 @@ export default function CheckoutPage() {
     <button onClick={confirm} className="action-button w-full justify-center">Confirmar reserva · {formatMoney(total)} <ArrowRight size={16} /></button>
     <Link href="/dashboard" className="demo-payment-link">Cancelar y volver a mi cuenta</Link>
     <div className="secure-foot"><ShieldCheck size={15} /> No se solicitan datos bancarios</div>
-  </section><aside className="order-card"><div className="eyebrow">RESUMEN DE COMPRA</div><h3>Tu reserva</h3><div className="order-service"><div className="order-service-thumb"><Icon size={23} /></div><div><b>{item.name}</b><span>Sede {item.sede} · {draft.attendees} {draft.attendees === 1 ? 'asistente' : 'asistentes'}</span></div></div><div className="order-item"><span><CalendarDays size={15} /> {formatDate(draft.date)}</span><span><Clock3 size={15} /> {draft.time} · 60 minutos</span></div><div className="order-price"><span>{formatMoney(item.price)} × {draft.attendees}</span><b>{formatMoney(total)}</b></div><div className="order-total"><span>Total</span><b>{formatMoney(total)} <small>COP</small></b></div></aside></div></main>
+  </section><aside className="order-card"><div className="eyebrow">RESUMEN DE COMPRA</div><h3>Tu reserva</h3><div className="order-service"><div className="order-service-thumb"><Icon size={23} /></div><div><b>{item.name}</b><span>Sede {item.sede}{!isCourt && <> · {draft.attendees} {draft.attendees === 1 ? 'asistente' : 'asistentes'}</>}</span></div></div><div className="order-item"><span><CalendarDays size={15} /> {formatDate(draft.date)}</span><span><Clock3 size={15} /> {draft.time} · 60 minutos</span></div><div className="order-price"><span>{isCourt ? 'Tarifa fija' : `${formatMoney(item.price)} × ${draft.attendees}`}</span><b>{formatMoney(total)}</b></div><div className="order-total"><span>Total</span><b>{formatMoney(total)} <small>COP</small></b></div></aside></div></main>
 }
