@@ -1,13 +1,21 @@
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { AppProvider } from '@/components/app-provider'
 import AppChrome from '@/components/app-chrome'
 import './globals.css'
 
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
-  title: 'Sport Complex · Reserva tu espacio',
-  description: 'Reserva canchas, piscina, gimnasio y zona húmeda en Sport Complex todo en un solo lugar.',
-  generator: 'v0.app',
+  title: 'Altura Club · Reserva tu espacio deportivo y bienestar',
+  description: 'Reserva canchas de tenis, pádel, fútbol, piscinas, gimnasio y zona húmeda en Altura Club, Medellín.',
+  generator: 'Altura Club Platform',
   icons: {
     icon: [
       {
@@ -41,11 +49,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es">
-      <body className="antialiased">
+    <html lang="es" suppressHydrationWarning>
+      <body className={`${plusJakartaSans.variable} font-sans antialiased`} suppressHydrationWarning>
         <AppProvider><AppChrome>{children}</AppChrome></AppProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )
 }
+

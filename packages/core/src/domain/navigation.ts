@@ -46,8 +46,8 @@ export const routeAccess: { prefix: string; roles: Role[] }[] = [
   { prefix: '/scanner', roles: ['staff', 'admin'] },
   { prefix: '/tickets', roles: ['customer', 'staff', 'admin'] },
   { prefix: '/dashboard', roles: ['customer'] },
-  { prefix: '/checkout', roles: ['customer'] },
-  { prefix: '/confirmation', roles: ['customer'] },
+  { prefix: '/checkout', roles: ['customer', 'admin'] },
+  { prefix: '/confirmation', roles: ['customer', 'admin'] },
 ]
 
 export function rolesAllowedFor(pathname: string): Role[] | null {

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Activity, ArrowLeft, ArrowRight } from 'lucide-react'
 import { sampleAccounts, type Role } from '@sportcomplex/core'
+import { Input } from '@sportcomplex/ui'
 import { Brand } from '@/components/brand'
 import { ActionButton } from '@/components/action-button'
 import { GoogleMark } from '@/components/google-mark'
@@ -109,7 +110,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
             {register && (
               <label>
                 Nombre completo
-                <input
+                <Input
                   required
                   value={name}
                   onChange={(event) => setName(event.target.value)}
@@ -120,7 +121,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
             )}
             <label>
               Correo electrónico
-              <input
+              <Input
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
@@ -131,7 +132,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
             </label>
             <label>
               Contraseña
-              <input
+              <Input
                 type="password"
                 minLength={6}
                 placeholder="Mínimo 6 caracteres"

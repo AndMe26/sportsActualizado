@@ -5,6 +5,7 @@ import { notFound, useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, Clock3, MapPin, ShieldCheck, Users } from 'lucide-react'
 import { calculateBookingPrice, categoryBySlug, formatDate, formatMoney, roleHome, timeSlots } from '@sportcomplex/core'
+import { Badge } from '@sportcomplex/ui'
 import { categoryIcons } from '@/components/category-icons'
 import { IconBox } from '@/components/icon-box'
 import { useApp } from '@/components/app-provider'
@@ -39,15 +40,6 @@ export default function ServiceBookingPage() {
   const reservationPath = `/services/${slug}/${id}`
 
   useEffect(() => {
-    if (!ready) return
-    if (!session) {
-      router.replace(`/login?next=${encodeURIComponent(reservationPath)}`)
-    } else if (session.role !== 'customer') {
-      router.replace(roleHome[session.role])
-    }
-  }, [ready, reservationPath, router, session])
-
-  useEffect(() => {
     if (today) {
       setSelectedDate(today)
       setSelectedTime('')
@@ -56,7 +48,7 @@ export default function ServiceBookingPage() {
   }, [id, today])
 
   if (!category || !item) notFound()
-  if (!ready || session?.role !== 'customer') return <main className="section-shell booking-page" aria-busy="true" />
+  if (!ready) return <main className="section-shell booking-page" aria-busy="true" />
 
   const available = item.status === 'Disponible'
   const isCourt = item.category === 'canchas'
@@ -67,6 +59,10 @@ export default function ServiceBookingPage() {
 
   const continueToCheckout = () => {
     if (!available || !selectedDate || !selectedTime) return
+    if (!session) {
+      router.push(`/login?next=${encodeURIComponent(reservationPath)}`)
+      return
+    }
     setDraft({ itemId: item.id, date: selectedDate, time: selectedTime, attendees })
     router.push('/checkout')
   }
@@ -81,7 +77,7 @@ export default function ServiceBookingPage() {
           <div className="booking-heading">
             <IconBox icon={Icon} tone={category.tone} className="booking-icon" />
             <div>
-              <div className="eyebrow">RESERVA TU ESPACIO</div>
+              <div className="eyebrow flex items-center gap-2">RESERVA TU ESPACIO{session?.role === 'admin' && <Badge variant="admin">VISTA ADMINISTRADOR</Badge>}</div>
               <h1>{item.name}</h1>
               <p>{item.description} · Sede {item.sede}</p>
             </div>
@@ -132,7 +128,9 @@ export default function ServiceBookingPage() {
           <div className="summary-detail"><MapPin size={15} /><div><small>Sede</small><b>{item.sede}</b></div></div>
           {!isCourt && <label className="attendee-select"><span><Users size={14} /> Asistentes</span><select aria-label="Cantidad de asistentes" value={attendees} onChange={(event) => setAttendees(Number(event.target.value))}>{Array.from({ length: maxAttendees }, (_, index) => index + 1).map((count) => <option key={count} value={count}>{count}</option>)}</select></label>}
           <div className="summary-total"><span>Total a pagar</span><b>{formatMoney(total)} <small>COP</small></b></div>
-          <button className="action-button w-full justify-center" onClick={continueToCheckout} disabled={!available || !selectedDate || !selectedTime}>{selectedTime ? 'Reservar este horario' : 'Elige un horario'} <ArrowRight size={15} /></button>
+          <button className="action-button w-full justify-center" onClick={continueToCheckout} disabled={!available || !selectedDate || !selectedTime}>
+            {selectedTime ? (session?.role === 'admin' ? 'Probar checkout (Auditor)' : !session ? 'Continuar (Iniciar sesión)' : 'Reservar este horario') : 'Elige un horario'} <ArrowRight size={15} />
+          </button>
           <p className="summary-note"><ShieldCheck size={11} /> El horario se confirma al terminar la reserva.</p>
         </aside>
       </div>

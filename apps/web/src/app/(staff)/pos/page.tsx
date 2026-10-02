@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ArrowRight, CheckCircle2, CreditCard, ShieldCheck } from 'lucide-react'
 import { formatMoney } from '@sportcomplex/core'
+import { ActionButton } from '@/components/action-button'
 import { PageHeading } from '@/components/page-heading'
 import { useApp } from '@/components/app-provider'
 import { useBookings, useCatalog } from '@/lib/stores'
@@ -32,11 +33,11 @@ export default function PointOfSalePage() {
       <div className="demo-total-row"><span>Descuento de miembro</span><b>−{formatMoney(discount)} COP</b></div>
       <div className="demo-total-row demo-total-final"><span>Total</span><b>{formatMoney(total)} COP</b></div>
       {/* TODO(ventas): persistir la venta en la base de datos. */}
-      <button className="action-button" disabled={!service} onClick={() => {
+      <ActionButton disabled={!service} onClick={() => {
         if (saleCode) { setSaleCode(null); return }
         setSaleCode(`POS-${Date.now().toString().slice(-6)}`)
         notify('Venta registrada correctamente.', 'success')
-      }}>{saleCode ? 'Iniciar otra venta' : 'Completar venta'} <ArrowRight size={16} /></button>
+      }}>{saleCode ? 'Iniciar otra venta' : 'Completar venta'} <ArrowRight size={16} /></ActionButton>
       {saleCode && <p className="demo-success" role="status"><CheckCircle2 size={17} /> Venta {saleCode} completada.</p>}
     </section><aside className="demo-card demo-side-note"><ShieldCheck size={22} /><h2>Resumen de caja</h2><p>Vendedor: {session?.name}</p><p>Cliente: {client}</p></aside></div>
   </main>
