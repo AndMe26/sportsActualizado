@@ -2,8 +2,10 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { ArrowRight, BadgeCheck, Check, CheckCircle2, CreditCard, MapPin } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Check, CheckCircle2, CreditCard, Download, MapPin, Receipt, ShieldCheck } from 'lucide-react'
 import { formatDate, formatMoney } from '@sportcomplex/core'
+import { Badge } from '@sportcomplex/ui'
+import { ActionButton } from '@/components/action-button'
 import { useBookings, useLastCode } from '@/lib/stores'
 
 function QRGraphic() {
@@ -19,20 +21,118 @@ function QRGraphic() {
   return <div className="qr-shell" aria-label="Código QR de acceso"><div className="qr-grid">{blocks.map((active, i) => <i key={i} className={active ? 'qr-on' : ''} />)}</div></div>
 }
 
+const paymentLabels: Record<string, string> = {
+  card: 'Tarjeta Débito / Crédito',
+  pse: 'Transferencia Bancaria PSE',
+  wompi: 'Nequi / Bancolombia QR',
+  on_site: 'Pago en Taquilla (Sede)',
+}
+
 export default function ReservationConfirmationPage() {
   const [bookings] = useBookings()
   const [code] = useLastCode()
   const booking = bookings.find((entry) => entry.code === code)
 
   if (!booking) {
-    return <main className="confirmation-page"><h1>No encontramos <span>esa reserva.</span></h1><p className="confirmation-copy">Consulta tus reservas en la sección de tiquetes.</p><div className="confirmation-actions"><Link href="/tickets" className="action-button">Ir a mis tiquetes <ArrowRight size={16} /></Link></div></main>
+    return (
+      <main className="confirmation-page">
+        <h1>No encontramos <span>esa reserva.</span></h1>
+        <p className="confirmation-copy">Consulta tus reservas en la sección de tiquetes.</p>
+        <div className="confirmation-actions">
+          <Link href="/tickets">
+            <ActionButton>Ir a mis tiquetes <ArrowRight size={16} /></ActionButton>
+          </Link>
+        </div>
+      </main>
+    )
   }
 
-  return <main className="confirmation-page"><div className="success-ring"><Check size={37} strokeWidth={2.5} /></div><div className="eyebrow success-eyebrow"><span className="live-dot" /> RESERVA CONFIRMADA</div><h1>¡Tu reserva está <span>lista!</span></h1><p className="confirmation-copy">Presenta este código QR en el acceso de la sede.</p>
-    <div className="ticket-card"><div className="ticket-header"><div><span className="eyebrow">TU PASE DE ACCESO</span><h2>{booking.service}</h2><p>Sede {booking.sede} · Medellín</p></div><span className="ticket-status"><BadgeCheck size={14} /> {booking.status.toUpperCase()}</span></div><div className="ticket-separator"><i /><span /><i /></div>
-      <div className="ticket-info"><div><small>FECHA</small><b>{formatDate(booking.date)}</b></div><div><small>{booking.category === 'canchas' ? 'HORA' : 'HORA · ASISTENTES'}</small><b>{booking.time}{booking.category !== 'canchas' && <> · {booking.attendees} {booking.attendees === 1 ? 'persona' : 'personas'}</>}</b></div></div>
-      <div className="ticket-qr"><QRGraphic /><div><b>Tu entrada, siempre a mano.</b><span>Muestra el código en el control de acceso.</span><small>{booking.code}</small></div></div>
-      <div className="ticket-footer"><span><MapPin size={14} /> Sede {booking.sede}</span><span><CreditCard size={14} /> {formatMoney(booking.amount)} COP</span></div></div>
-    <div className="email-notice"><span className="email-icon"><CheckCircle2 size={19} /></span><p><b>Pago en el complejo</b><span>Recuerda cancelar el valor al llegar a la sede.</span></p></div>
-    <div className="confirmation-actions"><Link href="/tickets" className="action-button">Ir a mis tiquetes <ArrowRight size={16} /></Link><Link href="/" className="text-link">Volver al inicio</Link></div></main>
+  const isPaid = booking.paymentMethod && booking.paymentMethod !== 'on_site'
+
+  return (
+    <main className="confirmation-page">
+      <div className="success-ring">
+        <Check size={37} strokeWidth={2.5} />
+      </div>
+      <div className="eyebrow success-eyebrow">
+        <span className="live-dot" /> RESERVA CONFIRMADA
+      </div>
+      <h1>¡Tu reserva está <span>lista!</span></h1>
+      <p className="confirmation-copy">Presenta este código QR en el acceso de la sede deportiva.</p>
+
+      <div className="ticket-card">
+        <div className="ticket-header">
+          <div>
+            <span className="eyebrow">TU PASE DE ACCESO</span>
+            <h2>{booking.service}</h2>
+            <p>Sede {booking.sede} · Medellín</p>
+          </div>
+          <Badge variant="success" className="text-[12px] px-2.5 py-1">
+            <BadgeCheck size={14} /> {booking.status.toUpperCase()}
+          </Badge>
+        </div>
+
+        <div className="ticket-separator"><i /><span /><i /></div>
+
+        <div className="ticket-info">
+          <div>
+            <small>FECHA</small>
+            <b>{formatDate(booking.date)}</b>
+          </div>
+          <div>
+            <small>{booking.category === 'canchas' ? 'HORA' : 'HORA · ASISTENTES'}</small>
+            <b>{booking.time}{booking.category !== 'canchas' && <> · {booking.attendees} {booking.attendees === 1 ? 'persona' : 'personas'}</>}</b>
+          </div>
+        </div>
+
+        <div className="ticket-qr">
+          <QRGraphic />
+          <div>
+            <b>Tu entrada, siempre a mano.</b>
+            <span>Muestra el código en el control de acceso de la sede.</span>
+            <small>{booking.code}</small>
+          </div>
+        </div>
+
+        <div className="ticket-footer">
+          <span><MapPin size={14} /> Sede {booking.sede}</span>
+          <span><CreditCard size={14} /> {formatMoney(booking.amount)} COP</span>
+        </div>
+      </div>
+
+      {/* Recibo digital de pago */}
+      <div className="email-notice">
+        <span className="email-icon">
+          <CheckCircle2 size={20} />
+        </span>
+        <div className="flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <b>{isPaid ? 'Comprobante de Pago Aprobado' : 'Pago Presencial en Sede'}</b>
+            <Badge variant={isPaid ? 'success' : 'warning'}>
+              {isPaid ? 'APROBADO' : 'POR PAGAR'}
+            </Badge>
+          </div>
+          <span className="text-[12px] text-[var(--subtle)] block mt-1">
+            Método: <b>{paymentLabels[booking.paymentMethod ?? 'on_site']}</b>
+            {booking.transactionRef && <> · Ref: <code>{booking.transactionRef}</code></>}
+          </span>
+          <span className="text-[11.5px] text-[var(--subtle)] block mt-0.5">
+            Total cancelado: {formatMoney(booking.amount)} COP (IVA del 19% incluido)
+          </span>
+        </div>
+      </div>
+
+      <div className="confirmation-actions">
+        <Link href="/tickets">
+          <ActionButton>
+            Ir a mis tiquetes <ArrowRight size={16} />
+          </ActionButton>
+        </Link>
+        <Link href="/" className="text-link">
+          Volver al inicio
+        </Link>
+      </div>
+    </main>
+  )
 }
+

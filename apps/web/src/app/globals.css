@@ -640,3 +640,254 @@ button { cursor: pointer; }
   }
 }
 
+/* ============================================================
+   FASE 4: PASARELA DE PAGOS Y ESCÁNER DE CÁMARA
+   ============================================================ */
+
+/* Selector de métodos de pago */
+.payment-methods-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+@media (max-width: 640px) {
+  .payment-methods-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.payment-tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--subtle);
+  font-size: 12px;
+  font-weight: 600;
+  transition: all .18s ease;
+  cursor: pointer;
+  min-height: 64px;
+}
+.payment-tab-btn:hover {
+  border-color: var(--brand-primary);
+  color: var(--ink);
+  background: var(--surface-soft);
+}
+.payment-tab-btn.active {
+  border-color: #123e30;
+  background: #f0f7ea;
+  color: #123e30;
+  font-weight: 750;
+  box-shadow: 0 0 0 1px #123e30;
+}
+.dark .payment-tab-btn.active {
+  border-color: #8cd766;
+  background: #19271e;
+  color: #8cd766;
+  box-shadow: 0 0 0 1px #8cd766;
+}
+
+/* Tarjeta visual interactiva */
+.card-visual-preview {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  height: 200px;
+  margin: 0 auto 20px;
+  border-radius: 16px;
+  padding: 22px 24px;
+  background: linear-gradient(135deg, #133e30 0%, #0d281f 65%, #081a14 100%);
+  color: #fff;
+  box-shadow: 0 16px 36px rgba(12, 40, 31, .35);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 1px solid rgba(201, 239, 117, .2);
+}
+.card-visual-preview::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 239, 117, .15) 0%, transparent 70%);
+}
+.card-chip {
+  width: 38px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #e3c06e 0%, #b8923a 100%);
+  border: 1px solid #d4ae4a;
+  box-shadow: inset 0 0 4px rgba(0,0,0,.25);
+}
+.card-preview-number {
+  font-family: monospace;
+  font-size: 19px;
+  letter-spacing: 2.5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,.4);
+}
+.card-preview-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.card-preview-name {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-preview-exp {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+/* Pantalla de procesamiento simulada */
+.payment-processing-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 35px 25px;
+}
+.processing-spinner {
+  width: 58px;
+  height: 58px;
+  border: 4px solid var(--line);
+  border-top-color: #c9ef75;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Cámara real en scanner */
+.camera-video-stream {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px;
+}
+.camera-active-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  background: rgba(18, 30, 22, 0.85);
+  backdrop-filter: blur(6px);
+  border: 1px solid #4a6345;
+  color: #c9ef75;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.camera-active-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c9ef75;
+  box-shadow: 0 0 8px #c9ef75;
+  animation: pulse-dot 1.5s infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.camera-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: min(100%, 440px);
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.camera-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid #3d4c41;
+  background: #19241e;
+  color: #c9ef75;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.camera-btn:hover {
+  background: #23332a;
+  border-color: #5c7562;
+}
+.camera-btn-stop {
+  border-color: #683832;
+  background: #261816;
+  color: #ff9d92;
+}
+.camera-btn-stop:hover {
+  background: #361f1c;
+  border-color: #8c4c44;
+}
+.camera-scanline-active {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c9ef75, transparent);
+  box-shadow: 0 0 12px #c9ef75;
+  animation: scanline-move 2.2s ease-in-out infinite;
+}
+@keyframes scanline-move {
+  0% { top: 10%; opacity: 0.3; }
+  50% { top: 90%; opacity: 1; }
+  100% { top: 10%; opacity: 0.3; }
+}
+.camera-scan-flash {
+  position: absolute;
+  inset: 0;
+  background: rgba(201, 239, 117, 0.35);
+  pointer-events: none;
+  animation: scan-flash .45s ease-out forwards;
+  z-index: 15;
+}
+@keyframes scan-flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.camera-error-banner {
+  width: min(100%, 440px);
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #2d1917;
+  border: 1px solid #6b3530;
+  color: #ffb8ae;
+  font-size: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+
