@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 
 // Estado compartido entre componentes y pestañas, guardado en localStorage.
 // Es el reemplazo temporal de la base de datos: cuando exista una API,
@@ -32,7 +32,8 @@ export function usePersistentState<T>(key: string, initial: T) {
     return () => { set.delete(callback); window.removeEventListener('storage', onStorage) }
   }, [key])
 
-  const value = useSyncExternalStore(subscribe, () => read(key, initial), () => initial)
+  const hydrated = useHydrated()
+  const rawValue = useSyncExternalStore(subscribe, () => read(key, initial), () => initial)
 
   const setValue = useCallback((next: T | ((previous: T) => T)) => {
     const previous = read(key, initial)
@@ -43,21 +44,26 @@ export function usePersistentState<T>(key: string, initial: T) {
     listeners.get(key)?.forEach((listener) => listener())
   }, [key, initial])
 
-  return [value, setValue] as const
+  return [hydrated ? rawValue : initial, setValue] as const
 }
 
-const noopSubscribe = () => () => {}
-
-/** false durante el render del servidor y la hidratación; true cuando ya se puede leer localStorage. */
+/** false durante el render del servidor y la hidratación inicial; true tras montar en el navegador. */
 export function useHydrated(): boolean {
-  return useSyncExternalStore(noopSubscribe, () => true, () => false)
+  const [hydrated, setHydrated] = useState(false)
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
+  return hydrated
 }
 
-/** Fecha de hoy (YYYY-MM-DD) en el navegador; cadena vacía en el servidor. */
+/** Fecha de hoy (YYYY-MM-DD) tras montar en el navegador; cadena vacía en SSR. */
 export function useToday(): string {
-  return useSyncExternalStore(noopSubscribe, () => {
+  const [today, setToday] = useState('')
+  useEffect(() => {
     const now = new Date()
     const pad = (value: number) => String(value).padStart(2, '0')
-    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
-  }, () => '')
+    setToday(`${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`)
+  }, [])
+  return today
 }
+
