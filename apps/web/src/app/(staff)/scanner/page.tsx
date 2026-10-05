@@ -26,6 +26,7 @@ import { formatDate, initials, roleHome, roleNavigation, serviceCategories, type
 import { Badge, Button, Input } from '@sportcomplex/ui'
 import { Brand } from '@/components/brand'
 import { UserMenu } from '@/components/user-menu'
+import { AthleticMarquee } from '@/components/athletic-marquee'
 import { useApp } from '@/components/app-provider'
 import { useBookings } from '@/lib/stores'
 
@@ -579,6 +580,10 @@ export default function AccessScannerPage() {
           </p>
         </div>
       )}
+
+      <div className="w-full max-w-[440px] my-3 rounded-xl overflow-hidden border border-[#303c35] shadow-lg">
+        <AthleticMarquee />
+      </div>
 
       <div className="scanner-bottom">
         <span>ALTURA CLUB · SISTEMA DE ACCESO</span>

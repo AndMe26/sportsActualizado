@@ -8,6 +8,7 @@ import { categoryBySlug, formatMoney, roleHome } from '@sportcomplex/core'
 import { categoryIcons } from '@/components/category-icons'
 import { CategoryFilters } from '@/components/category-filters'
 import { IconBox } from '@/components/icon-box'
+import { LiveConditions } from '@/components/live-conditions'
 import { useApp } from '@/components/app-provider'
 import { useCatalog } from '@/lib/stores'
 
@@ -47,10 +48,7 @@ export default function CategoryCatalogPage() {
               <span className="live-dot" />
               <span>Instalaciones oficiales</span>
             </span>
-            <span className="catalog-hero-pill">
-              <MapPin size={12} />
-              <span>Sedes Poblado &amp; Laureles</span>
-            </span>
+            <LiveConditions />
           </div>
           <div className="catalog-hero-bottom">
             <div className="catalog-hero-text">

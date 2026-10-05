@@ -6,8 +6,17 @@ import {
 import { cn } from '@sportcomplex/ui'
 
 export function Brand({ light = false }: { light?: boolean }) {
-  return <div className={cn('flex items-center gap-2.5 select-none', light ? 'text-white' : 'text-app')}>
-    <span className="brand-mark"><Activity size={19} strokeWidth={2.6} /></span>
-    <span className="text-[17px] font-extrabold tracking-[-0.04em]">Altura Club</span>
+  return <div className={cn('flex items-center gap-2 select-none', light ? 'text-white' : 'text-app')}>
+    <img
+      src="/images/Akros-logo.png"
+      alt="AKROS Active Lifestyle Club"
+      width={28}
+      height={24}
+      className="object-contain"
+    />
+    <div className="flex flex-col leading-none">
+      <span className="text-[16px] font-black tracking-[0.08em]">AKROS</span>
+      <span className="text-[8px] font-bold tracking-[0.16em] uppercase opacity-75">Club</span>
+    </div>
   </div>
 }
