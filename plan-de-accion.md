@@ -11,7 +11,7 @@ Este plan de acción desglosa la ejecución de las mejoras identificadas en la a
 | **Fase 1** | **Quick Wins, Higiene de Datos y Accesibilidad Crítica** | Crítico | Bajo | ✅ **Completada** |
 | **Fase 2** | **Correcciones Estructurales, Ergonomía Móvil y Dark Mode** | Alto | Medio | ✅ **Completada** |
 | **Fase 3** | **Sistema Visual, Tipografía Corporativa y Componentes UI** | Alto | Medio | ✅ **Completada** |
-| **Fase 4** | **Escalabilidad de Negocio, Pasarela de Pagos y Cámara QR** | Alto | Alto | 🚀 **Lista para Iniciar** |
+| **Fase 4** | **Escalabilidad de Negocio, Pasarela de Pagos y Cámara QR** | Alto | Alto | ✅ **Completada** |
 
 ---
 
@@ -115,10 +115,26 @@ Este plan de acción desglosa la ejecución de las mejoras identificadas en la a
 
 ---
 
-## ⏳ Fase 4: Escalabilidad, Pagos y Funcionalidades Reales
+## ✅ Fase 4: Escalabilidad de Negocio, Pasarela de Pagos y Cámara QR (Completada)
 
-### Tarea 4.1: Pasarela de pagos en `/checkout`
-- Integrar pasarela de pago (Wompi, PSE o tarjeta) con manejo de estados de transacción.
+### Tarea 4.1: Pasarela de pagos interactiva en `/checkout` y comprobante digital en `/confirmation` (Completada)
+- **Extensión del Dominio:** Modelo `Booking` enriquecido con `paymentMethod` (`'card' | 'pse' | 'wompi' | 'on_site'`), `paymentStatus` (`'approved' | 'pending' | 'rejected'`) y `transactionRef` único generado en formato `WMP-ALT-XXXXXX`.
+- **Experiencia de Pago Multicanal:**
+  1. **Tarjeta de Crédito / Débito:** Previsualización dinámica e interactiva de tarjeta física con microtexturas, chip dorado, formateo automático en bloques de 4 dígitos, fecha de vencimiento (`MM/AA`), código de seguridad CVC, selector de cuotas (1 a 24) y botón de carga de tarjeta de pruebas de auditoría.
+  2. **PSE / Transferencia Bancaria:** Selector de 10 entidades bancarias colombianas, clasificación de persona (Natural / Jurídica), tipo de documento, número de identificación y correo registrado en ACH.
+  3. **Wompi / Nequi / Bancolombia a la Mano:** Entrada de número celular a 10 dígitos y badge de procesamiento instantáneo.
+  4. **Pago en Sede Deportiva:** Opción para abono en efectivo o datáfono físico en recepción al presentarse a la reserva.
+- **Simulador de Transacción:** Modal de procesamiento con animación de spinner, 3 etapas de validación en tiempo real (Conexión $\rightarrow$ Verificación de fondos y token $\rightarrow$ Aprobación) y generación de recibo digital.
+- **Comprobante y Pase Digital (`/confirmation`):** Renderizado de factura con desglose de IVA (19%), ID de transacción auditable, estado `APROBADO` en verde esmeralda y pase de acceso con código QR generado en tiempo real.
+- **Archivos:** `packages/core/src/data/records.ts`, `apps/web/src/app/(customer)/checkout/page.tsx`, `apps/web/src/app/(customer)/confirmation/page.tsx`, `apps/web/src/app/globals.css`.
 
-### Tarea 4.2: Lector de cámara física en `/scanner`
-- Integración con API de medios del navegador (`getUserMedia`) para lectura QR en tiempo real en taquilla.
+### Tarea 4.2: Lector de cámara física con WebRTC y escáner de códigos QR en `/scanner` (Completada)
+- **Flujo de Video en Tiempo Real:** Integración directa con `navigator.mediaDevices.getUserMedia` para transmisión continua de video en el visor del escáner con selector de cámara frontal o trasera (`facingMode: 'environment' | 'user'`).
+- **Resiliencia y Manejo de Permisos:** Detección de soporte de hardware, control de timeout (`Promise.race`) contra bloqueos en navegadores sin permisos o entornos headless, y banner informativo estilizado ante excepciones de hardware (`NotAllowedError`, `NotFoundError`).
+- **Reconocimiento y Validación Instantánea:**
+  - Bucle de detección automática con API nativa `BarcodeDetector` (para formatos QR, Code 128, Code 39, EAN 13).
+  - Feedback sonoro sintetizado con Web Audio API (`AudioContext`) emitiendo acordes de éxito armónicos (880 Hz / 1174 Hz) y alertas de error conmutables mediante botón de silenciar.
+  - Efecto de destello visual en pantalla (`camera-scan-flash`) y animación de rayo láser escaneador (`camera-scanline-active`).
+- **Simulación y Pruebas Rápidas:** Selector de códigos rápidos de desarrollo vinculados en tiempo real con las reservas activas (incluyendo las recién pagadas).
+- **Control de Acceso Operativo:** Detección de tiquetes válidos, reservas usadas (`YA USADO`), reservas no activas y servicios incorrectos, con botón de registro de ingreso en un solo clic que actualiza el estado inmediatamente en todo el sistema.
+- **Archivos:** `apps/web/src/app/(staff)/scanner/page.tsx`, `apps/web/src/app/globals.css`.

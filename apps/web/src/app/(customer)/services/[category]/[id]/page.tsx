@@ -8,6 +8,7 @@ import { calculateBookingPrice, categoryBySlug, formatDate, formatMoney, roleHom
 import { Badge } from '@sportcomplex/ui'
 import { categoryIcons } from '@/components/category-icons'
 import { IconBox } from '@/components/icon-box'
+import { SportsSpecsGrid } from '@/components/sports-specs-grid'
 import { useApp } from '@/components/app-provider'
 import { useBookings, useCatalog, useDraft } from '@/lib/stores'
 import { useToday } from '@/lib/persistent-state'
@@ -74,22 +75,53 @@ export default function ServiceBookingPage() {
       </Link>
       <div className="booking-layout">
         <section>
-          <div className="booking-heading">
-            <IconBox icon={Icon} tone={category.tone} className="booking-icon" />
-            <div>
-              <div className="eyebrow flex items-center gap-2">RESERVA TU ESPACIO{session?.role === 'admin' && <Badge variant="admin">VISTA ADMINISTRADOR</Badge>}</div>
-              <h1>{item.name}</h1>
-              <p>{item.description} · Sede {item.sede}</p>
+          {/* Hero Panorámico de Reserva con Card Glass Flotante */}
+          <div className="booking-hero-container">
+            <img
+              className="booking-cover-image"
+              src={item.image || '/images/club-hero.png'}
+              alt={item.name}
+              onError={(event) => { event.currentTarget.src = '/images/club-hero.png' }}
+            />
+            <div className="booking-hero-gradient" />
+
+            {/* Contenedor Glassmorphism Flotante con Icono y Detalles */}
+            <div className="booking-glass-info-card">
+              <IconBox icon={Icon} tone={category.tone} className="booking-glass-icon" />
+              <div className="booking-glass-text">
+                <div className="booking-glass-title-row">
+                  <h1 className="booking-glass-title">
+                    {item.name.toLowerCase().startsWith((category.singular || category.name).toLowerCase())
+                      ? item.name
+                      : `${category.singular || category.name} · ${item.name}`}
+                  </h1>
+                  {session?.role === 'admin' && (
+                    <Badge variant="admin" className="ml-2">ADMIN</Badge>
+                  )}
+                </div>
+                <p className="booking-glass-desc">
+                  {item.description} · Sede {item.sede}
+                </p>
+              </div>
+            </div>
+
+            {/* Badges Flotantes de Estado y Sede */}
+            <div className="booking-bottom-badges">
+              <span className="booking-status-badge">
+                <i className="live-dot" style={{ background: available ? undefined : '#edb45b' }} />
+                {available ? 'DISPONIBLE' : 'NO DISPONIBLE'}
+              </span>
+              <span className="booking-sede-badge">
+                <MapPin size={13} /> Sede {item.sede}
+              </span>
             </div>
           </div>
 
-          <div className="booking-photo">
-            <img className="booking-cover-image" src={item.image || '/images/club-hero.png'} alt="" onError={(event) => { event.currentTarget.src = '/images/club-hero.png' }} />
-            <div className="booking-photo-overlay">
-              <span><i className="live-dot" style={{ background: available ? undefined : '#edb45b' }} />{available ? 'DISPONIBLE' : 'NO DISPONIBLE'}</span>
-              <span><MapPin size={12} /> Sede {item.sede}</span>
-            </div>
-          </div>
+          {/* Ficha técnica deportiva (Alpine Guides & Roland Garros) */}
+          <SportsSpecsGrid categorySlug={category.slug} itemId={item.id} capacity={item.capacity} />
+
+          {/* Divisor estilo líneas de cancha (Roland Garros) */}
+          <div className="court-line-divider" />
 
           <section className="calendar-section">
             <div className="calendar-heading">

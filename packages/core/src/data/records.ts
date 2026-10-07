@@ -2,6 +2,8 @@ import type { CategorySlug } from './catalog'
 import type { Role } from '../domain/navigation'
 
 export type BookingStatus = 'Confirmada' | 'Pendiente' | 'Cancelada' | 'Usada'
+export type PaymentMethod = 'card' | 'pse' | 'wompi' | 'on_site'
+export type PaymentStatus = 'Aprobada' | 'Pendiente' | 'Rechazada'
 
 export type Booking = {
   id: string
@@ -16,6 +18,9 @@ export type Booking = {
   attendees: number
   amount: number
   status: BookingStatus
+  paymentMethod?: PaymentMethod
+  paymentStatus?: PaymentStatus
+  transactionRef?: string
 }
 
 export const initialBookings: Booking[] = [
